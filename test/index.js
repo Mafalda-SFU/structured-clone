@@ -79,8 +79,9 @@ function test(firstRun = false) {
     `null],[0,"int"],["Uint32Array",[1,2,3]],[0,"map"],[5,[[19,8]]],[0,"a"],[0`,
     `"set"],[6,[19,22]],[0,"b"],[0,"Bool"],["Boolean",false],[0,"Num"]`,
     `["Number",0],[0,"Str"],["String",""],[0,"re"],[4,{"source":"test"`,
-    `"flags":"gim"}],[0,"error"],[7,{"name":"Error","message":"test"}],[0`,
-    `"BI"],["BigInt","1"],[0,"date"],[3,"${date.toISOString()}"],[0`,
+    `"flags":"gim"}],[0,"error"],[7,{"name":"Error","message":"test"`,
+    `"stack":"Error: test\\n    at Object.<anonymous> (/home/piranna/github/Mafalda/structured-clone/test/index.js:44:10)\\n    at Module._compile (node:internal/modules/cjs/loader:1105:14)\\n    at Module._extensions..js (node:internal/modules/cjs/loader:1159:10)\\n    at Module.load (node:internal/modules/cjs/loader:981:32)\\n    at Module._load (node:internal/modules/cjs/loader:827:12)\\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:77:12)\\n    at node:internal/main/run_main_module:17:47"}]`,
+    `[0,"BI"],["BigInt","1"],[0,"date"],[3,"${date.toISOString()}"],[0`,
     `"instance"],["Klass",[[19,39],[22,40]]],[0,1],[0,2]]`
   ].join(','));
 
