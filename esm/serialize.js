@@ -19,8 +19,11 @@ const typeOf = value => {
   switch (asString) {
     case 'Array':
       return [ARRAY, EMPTY];
-    case 'Object':
+    case 'Object': {
+      const {name} = value.constructor;
+      if(name !== 'Object') return [OBJECT, name];
       return [OBJECT, EMPTY];
+    }
     case 'Date':
       return [DATE, EMPTY];
     case 'RegExp':
@@ -45,7 +48,7 @@ const shouldSkip = ([TYPE, type]) => (
   (type === 'function' || type === 'symbol')
 );
 
-const serializer = (strict, json, $, _) => {
+const serializer = (strict, json, classes, $, _) => {
 
   const as = (out, value) => {
     const index = _.push(out) - 1;
@@ -97,6 +100,7 @@ const serializer = (strict, json, $, _) => {
             case 'String':
               return as([type, value.valueOf()], value);
           }
+          if(classes) TYPE = type;
         }
 
         if (json && ('toJSON' in value))
@@ -155,7 +159,7 @@ const serializer = (strict, json, $, _) => {
  *  like JSON stringify would behave. Symbol and Function will be discarded.
  * @returns {Record[]}
  */
- export const serialize = (value, {json, lossy} = {}) => {
+export const serialize = (value, {classes, json, lossy} = {}) => {
   const _ = [];
-  return serializer(!(json || lossy), !!json, new Map, _)(value), _;
+  return serializer(!(json || lossy), !!json, classes, new Map, _)(value), _;
 };

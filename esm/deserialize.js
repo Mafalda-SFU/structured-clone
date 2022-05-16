@@ -1,3 +1,5 @@
+import {ok} from 'assert/strict';
+
 import {
   VOID, PRIMITIVE,
   ARRAY, OBJECT,
@@ -7,11 +9,20 @@ import {
 
 const env = typeof self === 'object' ? self : globalThis;
 
-const deserializer = ($, _) => {
+const deserializer = (json, classes, $, _) => {
   const as = (out, index) => {
     $.set(index, out);
     return out;
   };
+
+  function getClass(name)
+  {
+    const Class = classes?.[name] || env[name]
+
+    ok(Class instanceof Function, `Class ${name} is not a function`);
+
+    return Class;
+  }
 
   const unpair = index => {
     if ($.has(index))
@@ -61,7 +72,30 @@ const deserializer = ($, _) => {
       case 'BigInt':
         return as(Object(BigInt(value)), index);
     }
-    return as(new env[type](value), index);
+
+    // Class instances
+    const Class = getClass(type);
+
+    let instance
+    if(!(type in classes))
+      instance = new Class(value)
+    else {
+      // For both class constructors and `fromJSON()` function, deserialize all
+      // child elements before the parent one ("post-tree"). This is because we
+      // are not sure of create the tree by setting child objects as attributes
+      // of the parent one ("pre-tree")
+      // TODO: check for cycles by using a stack. Should it throw, or just
+      //       assign them as regular `Object`s? Maybe store them and delay
+      //       assignement on not class based objects?
+      const seed = {}
+      for (const [key, index] of value) seed[unpair(key)] = unpair(index);
+
+      instance = (json && Class.fromJSON)
+        ? Class.fromJSON(seed)
+        : new Class(seed)
+    }
+
+    return as(instance, index);
   };
 
   return unpair;
@@ -76,4 +110,5 @@ const deserializer = ($, _) => {
  * @param {Record[]} serialized a previously serialized value.
  * @returns {any}
  */
-export const deserialize = serialized => deserializer(new Map, serialized)(0);
+export const deserialize = (serialized, {classes, json} = {}) =>
+  deserializer(!!json, classes, new Map, serialized)(0);
