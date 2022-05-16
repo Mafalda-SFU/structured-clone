@@ -1,9 +1,11 @@
+const {diffStringsUnified} = require('jest-diff');
+
 let {serialize, deserialize, default: structuredClone} = require('../cjs');
 let {stringify, parse} = require('../cjs/json');
 
 const assert = (result, expected, message = '') => {
   if (!Object.is(expected, result)) {
-    console.error(message || `expected ${expected}\ngot      ${result}`);
+    console.error(message || diffStringsUnified(expected, result));
     process.exit(1);
   }
 };
