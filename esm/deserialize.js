@@ -1,5 +1,7 @@
 import {ok} from 'assert/strict';
 
+import { parse } from 'error-to-json'
+
 import {
   VOID, PRIMITIVE,
   ARRAY, OBJECT,
@@ -64,8 +66,7 @@ const deserializer = (json, classes, $, _) => {
         return set;
       }
       case ERROR: {
-        const {name, message} = value;
-        return as(new env[name](message), index);
+        return as(parse(value), index);
       }
       case BIGINT:
         return as(BigInt(value), index);

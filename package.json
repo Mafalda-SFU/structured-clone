@@ -49,5 +49,8 @@
   "bugs": {
     "url": "https://github.com/ungap/structured-clone/issues"
   },
-  "homepage": "https://github.com/ungap/structured-clone#readme"
+  "homepage": "https://github.com/ungap/structured-clone#readme",
+  "dependencies": {
+    "error-to-json": "github:piranna/error-to-json"
+  }
 }

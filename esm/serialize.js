@@ -1,3 +1,5 @@
+import errorToJSON from 'error-to-json'
+
 import {
   VOID, PRIMITIVE,
   ARRAY, OBJECT,
@@ -140,8 +142,8 @@ const serializer = (strict, json, classes, $, _) => {
       }
     }
 
-    const {message} = value;
-    return as([TYPE, {name: type, message}], value);
+    // `ERROR` and other unknown `TYPE`s
+    return as([TYPE, errorToJSON(value)], value);
   };
 
   return pair;

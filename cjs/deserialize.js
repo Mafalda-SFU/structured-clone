@@ -1,6 +1,8 @@
 'use strict';
 const {ok} = require('assert/strict');
 
+const { parse } = require('error-to-json')
+
 const {
   VOID, PRIMITIVE, ARRAY, OBJECT, DATE, REGEXP, MAP, SET, ERROR, BIGINT
 } = require('./types.js');
@@ -62,8 +64,7 @@ const deserializer = (json, classes, $, _) => {
         return set;
       }
       case ERROR: {
-        const {name, message} = value;
-        return as(new env[name](message), index);
+        return as(parse(value), index);
       }
       case BIGINT:
         return as(BigInt(value), index);

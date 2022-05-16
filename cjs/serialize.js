@@ -1,4 +1,6 @@
 'use strict';
+const errorToJSON = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('error-to-json'))
+
 const {
   VOID, PRIMITIVE, ARRAY, OBJECT, DATE, REGEXP, MAP, SET, ERROR, BIGINT
 } = require('./types.js');
@@ -138,8 +140,8 @@ const serializer = (strict, json, classes, $, _) => {
       }
     }
 
-    const {message} = value;
-    return as([TYPE, {name: type, message}], value);
+    // `ERROR` and other unknown `TYPE`s
+    return as([TYPE, errorToJSON(value)], value);
   };
 
   return pair;
