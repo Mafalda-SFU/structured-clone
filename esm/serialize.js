@@ -85,7 +85,7 @@ const serializer = (strict, json, classes, $, _) => {
       case ARRAY: {
         if (type)
           return as([type, [...value]], value);
-  
+
         const arr = [];
         const index = as([TYPE, arr], value);
         for (const entry of value)
@@ -105,9 +105,11 @@ const serializer = (strict, json, classes, $, _) => {
           if(classes) TYPE = type;
         }
 
+        // Object with `toJSON` method
         if (json && ('toJSON' in value))
           return pair(value.toJSON());
 
+        // Regular object
         const entries = [];
         const index = as([TYPE, entries], value);
         for (const key of keys(value)) {
