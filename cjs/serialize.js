@@ -20,7 +20,7 @@ const typeOf = value => {
     case 'Array':
       return [ARRAY, EMPTY];
     case 'Object': {
-      const {name} = value.constructor;
+      const {name} = value.constructor || {};
       if(name !== 'Object') return [OBJECT, name];
       return [OBJECT, EMPTY];
     }
