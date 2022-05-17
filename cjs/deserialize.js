@@ -9,20 +9,11 @@ const {
 
 const env = typeof self === 'object' ? self : globalThis;
 
-const deserializer = (json, classes, $, _) => {
+const deserializer = (json, classes, deserializers, $, _) => {
   const as = (out, index) => {
     $.set(index, out);
     return out;
   };
-
-  function getClass(name)
-  {
-    const Class = classes?.[name] || env[name]
-
-    ok(Class instanceof Function, `Class ${name} is not a function`);
-
-    return Class;
-  }
 
   const unpair = index => {
     if ($.has(index))
@@ -72,13 +63,18 @@ const deserializer = (json, classes, $, _) => {
         return as(Object(BigInt(value)), index);
     }
 
-    // Class instances
-    const Class = getClass(type);
+    // Deserializers
+    const deserialize = deserializers?.[type];
+    if (typeof deserialize === 'function')
+      return as(deserialize(unpair(value)), index);
 
-    let instance
-    if(!(type in classes))
-      instance = new Class(value)
-    else {
+    // Class instances
+    const Class = classes?.[type];
+    if (Class) {
+      // Class with `fromJSON` static method
+      if (json && ('fromJSON' in Class))
+        return as(Class.fromJSON(unpair(value)), index);
+
       // For both class constructors and `fromJSON()` function, deserialize all
       // child elements before the parent one ("post-tree"). This is because we
       // are not sure of create the tree by setting child objects as attributes
@@ -89,12 +85,10 @@ const deserializer = (json, classes, $, _) => {
       const seed = {}
       for (const [key, index] of value) seed[unpair(key)] = unpair(index);
 
-      instance = (json && Class.fromJSON)
-        ? Class.fromJSON(seed)
-        : new Class(seed)
+      return as(new Class(seed), index)
     }
 
-    return as(instance, index);
+    return as(new env[type](value), index);
   };
 
   return unpair;
@@ -109,6 +103,6 @@ const deserializer = (json, classes, $, _) => {
  * @param {Record[]} serialized a previously serialized value.
  * @returns {any}
  */
-const deserialize = (serialized, {classes, json} = {}) =>
-  deserializer(!!json, classes, new Map, serialized)(0);
+const deserialize = (serialized, {classes, deserializers, json} = {}) =>
+  deserializer(!!json, classes, deserializers, new Map, serialized)(0);
 exports.deserialize = deserialize;

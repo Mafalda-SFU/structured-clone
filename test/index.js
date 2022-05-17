@@ -68,7 +68,7 @@ function test(firstRun = false) {
 
   console.log(`\x1b[1m${firstRun ? 'cold' : 'warm'}\x1b[0m`);
   console.time('serialized in');
-  const serialized = serialize(obj, {classes: true});
+  const serialized = serialize(obj, {serializers: {Klass: true}});
   console.timeEnd('serialized in');
 
   assert(JSON.stringify(serialized), [
@@ -80,7 +80,7 @@ function test(firstRun = false) {
     `"set"],[6,[19,22]],[0,"b"],[0,"Bool"],["Boolean",false],[0,"Num"]`,
     `["Number",0],[0,"Str"],["String",""],[0,"re"],[4,{"source":"test"`,
     `"flags":"gim"}],[0,"error"],[7,{"name":"Error","message":"test"`,
-    `"stack":"Error: test\\n    at Object.<anonymous> (/home/piranna/github/Mafalda/structured-clone/test/index.js:44:10)\\n    at Module._compile (node:internal/modules/cjs/loader:1105:14)\\n    at Module._extensions..js (node:internal/modules/cjs/loader:1159:10)\\n    at Module.load (node:internal/modules/cjs/loader:981:32)\\n    at Module._load (node:internal/modules/cjs/loader:827:12)\\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:77:12)\\n    at node:internal/main/run_main_module:17:47"}]`,
+    `"stack":"Error: test\\n    at Object.<anonymous> (/home/piranna/github/Mafalda/structured-clone/test/index.js:43:10)\\n    at Module._compile (node:internal/modules/cjs/loader:1105:14)\\n    at Module._extensions..js (node:internal/modules/cjs/loader:1159:10)\\n    at Module.load (node:internal/modules/cjs/loader:981:32)\\n    at Module._load (node:internal/modules/cjs/loader:827:12)\\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:77:12)\\n    at node:internal/main/run_main_module:17:47"}]`,
     `[0,"BI"],["BigInt","1"],[0,"date"],[3,"${date.toISOString()}"],[0`,
     `"instance"],["Klass",[[19,39],[22,40]]],[0,1],[0,2]]`
   ].join(','));

@@ -48,7 +48,7 @@ const shouldSkip = ([TYPE, type]) => (
   (type === 'function' || type === 'symbol')
 );
 
-const serializer = (strict, json, classes, $, _) => {
+const serializer = (strict, json, serializers, $, _) => {
 
   const as = (out, value) => {
     const index = _.push(out) - 1;
@@ -100,12 +100,23 @@ const serializer = (strict, json, classes, $, _) => {
             case 'String':
               return as([type, value.valueOf()], value);
           }
-          if(classes) TYPE = type;
+
+          // Serializers
+          const serialize = serializers?.[type];
+          if (serialize) {
+            if (typeof serialize === 'function')
+              return as([type, pair(serialize(value))], value);
+
+            TYPE = type;
+          }
         }
 
         // Object with `toJSON` method
-        if (json && ('toJSON' in value))
-          return pair(value.toJSON());
+        if (json && ('toJSON' in value)) {
+          const result = pair(value.toJSON());
+
+          return TYPE === OBJECT ? result : as([TYPE, result], value);
+        }
 
         // Regular object
         const entries = [];
@@ -161,8 +172,8 @@ const serializer = (strict, json, classes, $, _) => {
  *  like JSON stringify would behave. Symbol and Function will be discarded.
  * @returns {Record[]}
  */
-const serialize = (value, {classes, json, lossy} = {}) => {
+const serialize = (value, {json, lossy, serializers} = {}) => {
   const _ = [];
-  return serializer(!(json || lossy), !!json, classes, new Map, _)(value), _;
+  return serializer(!(json || lossy), !!json, serializers, new Map, _)(value), _;
 };
 exports.serialize = serialize;
