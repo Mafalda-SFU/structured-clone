@@ -106,8 +106,11 @@ const serializer = (strict, json, serializers, $, _) => {
           // Serializers
           const serialize = serializers?.[type];
           if (serialize) {
-            if (typeof serialize === 'function')
-              return as([type, pair(serialize(value))], value);
+            if (typeof serialize === 'function') {
+              const index = as([type], value);
+              _[index][1] = pair(serialize(value));
+              return index;
+            }
 
             TYPE = type;
           }
