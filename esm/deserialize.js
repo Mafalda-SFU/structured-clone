@@ -21,11 +21,13 @@ const deserializer = (json, classes, deserializers, $, _) => {
     if ($.has(index))
       return $.get(index);
 
+    if(_[index] === VOID)
+      return as(value, index);
+
     const [type, value] = _[index];
     switch (type) {
       // Basic types
       case PRIMITIVE:
-      case VOID:
         return as(value, index);
       case DATE:
         return as(new Date(value), index);

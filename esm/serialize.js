@@ -79,7 +79,7 @@ const serializer = (strict, json, serializers, $, _) => {
             entry = null;
             break;
           case 'undefined':
-            return as([VOID], value);
+            return as(VOID, value);
         }
         return as([TYPE, entry], value);
       }
