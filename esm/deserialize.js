@@ -31,10 +31,8 @@ const deserializer = (json, classes, deserializers, $, _) => {
         return as(value, index);
       case DATE:
         return as(new Date(value), index);
-      case REGEXP: {
-        const {source, flags} = value;
-        return as(new RegExp(source, flags), index);
-      }
+      case REGEXP:
+        return as(new RegExp(...value), index);
       case ERROR: {
         return as(parse(value), index);
       }

@@ -87,7 +87,7 @@ const serializer = (strict, json, serializers, $, _) => {
         return as([TYPE, value.toISOString()], value);
       case REGEXP: {
         const {source, flags} = value;
-        return as([TYPE, {source, flags}], value);
+        return as([TYPE, [source, flags]], value);
       }
 
       // Collections
