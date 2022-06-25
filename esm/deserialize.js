@@ -23,9 +23,25 @@ const deserializer = (json, classes, deserializers, $, _) => {
 
     const [type, value] = _[index];
     switch (type) {
+      // Basic types
       case PRIMITIVE:
       case VOID:
         return as(value, index);
+      case DATE:
+        return as(new Date(value), index);
+      case REGEXP: {
+        const {source, flags} = value;
+        return as(new RegExp(source, flags), index);
+      }
+      case ERROR: {
+        return as(parse(value), index);
+      }
+      case BIGINT:
+        return as(BigInt(value), index);
+      case 'BigInt':
+        return as(Object(BigInt(value)), index);
+
+      // Collections
       case ARRAY: {
         const arr = as([], index);
         for (const index of value)
@@ -37,12 +53,6 @@ const deserializer = (json, classes, deserializers, $, _) => {
         for (const [key, index] of value)
           object[unpair(key)] = unpair(index);
         return object;
-      }
-      case DATE:
-        return as(new Date(value), index);
-      case REGEXP: {
-        const {source, flags} = value;
-        return as(new RegExp(source, flags), index);
       }
       case MAP: {
         const map = as(new Map, index);
@@ -56,13 +66,6 @@ const deserializer = (json, classes, deserializers, $, _) => {
           set.add(unpair(index));
         return set;
       }
-      case ERROR: {
-        return as(parse(value), index);
-      }
-      case BIGINT:
-        return as(BigInt(value), index);
-      case 'BigInt':
-        return as(Object(BigInt(value)), index);
     }
 
     // Deserializers

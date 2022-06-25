@@ -64,6 +64,7 @@ const serializer = (strict, json, serializers, $, _) => {
 
     let [TYPE, type] = typeOf(value);
     switch (TYPE) {
+      // Basic types
       case PRIMITIVE: {
         let entry = value;
         switch (type) {
@@ -82,6 +83,14 @@ const serializer = (strict, json, serializers, $, _) => {
         }
         return as([TYPE, entry], value);
       }
+      case DATE:
+        return as([TYPE, value.toISOString()], value);
+      case REGEXP: {
+        const {source, flags} = value;
+        return as([TYPE, {source, flags}], value);
+      }
+
+      // Collections
       case ARRAY: {
         if (type)
           return as([type, [...value]], value);
@@ -131,12 +140,6 @@ const serializer = (strict, json, serializers, $, _) => {
             entries.push([pair(key), pair(value[key])]);
         }
         return index;
-      }
-      case DATE:
-        return as([TYPE, value.toISOString()], value);
-      case REGEXP: {
-        const {source, flags} = value;
-        return as([TYPE, {source, flags}], value);
       }
       case MAP: {
         const entries = [];
