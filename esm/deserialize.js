@@ -7,9 +7,12 @@ import {
 
 const env = typeof self === 'object' ? self : globalThis;
 
-const deserializer = (json, classes, deserializers, $, _) => {
-  const as = (out, index) => {
+const deserializer = (json, classes, deserializers, objects, $, _) => {
+  const as = (out, index, uuid) => {
     $.set(index, out);
+
+    if(uuid) objects?.set(uuid, out);
+
     return out;
   };
 
@@ -27,45 +30,57 @@ const deserializer = (json, classes, deserializers, $, _) => {
       case EMPTY_STR: return '';
     }
 
-    const [type, value] = _[index];
+    // Direct duplicates of previous serializations
+    if(typeof index === 'string') {  // `index` is an UUID string
+      const object = objects?.get(index)
+      ok(object !== undefined, `Unknown object for UUID '${index}'`)
+
+      return object;
+    }
+
+    const entry = _[index]
+
     // Regular structured clone objects
+    const [type, value, uuid] = entry;
     switch (type) {
       // Basic types
       case PRIMITIVE:
         return as(value, index);
       case DATE:
-        return as(new Date(value), index);
+        return as(new Date(value), index, uuid);
       case REGEXP:
-        return as(new RegExp(...value), index);
-      case ERROR: {
-        return as(parse(value), index);
-      }
+        return as(new RegExp(...value), index, uuid);
+      case ERROR:
+        return as(parse(value), index, uuid);
+
+      // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#comparisons
       case BIGINT:
         return as(BigInt(value), index);
       case 'BigInt':
-        return as(Object(BigInt(value)), index);
+        // Instance, needs UUID for equality
+        return as(Object(BigInt(value)), index, uuid);
 
       // Collections
       case ARRAY: {
-        const arr = as([], index);
+        const arr = as([], index, uuid);
         for (const index of value)
           arr.push(unpair(index));
         return arr;
       }
       case OBJECT: {
-        const object = as({}, index);
+        const object = as({}, index, uuid);
         for (const [key, index] of value)
           object[unpair(key)] = unpair(index);
         return object;
       }
       case MAP: {
-        const map = as(new Map, index);
+        const map = as(new Map, index, uuid);
         for (const [key, index] of value)
           map.set(unpair(key), unpair(index));
         return map;
       }
       case SET: {
-        const set = as(new Set, index);
+        const set = as(new Set, index, uuid);
         for (const index of value)
           set.add(unpair(index));
         return set;
@@ -75,14 +90,14 @@ const deserializer = (json, classes, deserializers, $, _) => {
     // Deserializers
     const deserialize = deserializers?.[type];
     if (typeof deserialize === 'function')
-      return as(deserialize(unpair(value)), index);
+      return as(deserialize(unpair(value)), index, uuid);
 
     // Class instances
     const Class = classes?.[type];
     if (Class) {
       // Class with `fromJSON` static method
       if (json && ('fromJSON' in Class))
-        return as(Class.fromJSON(unpair(value)), index);
+        return as(Class.fromJSON(unpair(value)), index, uuid);
 
       // For both class constructors and `fromJSON()` function, deserialize all
       // child elements before the parent one ("post-tree"). This is because we
@@ -94,10 +109,10 @@ const deserializer = (json, classes, deserializers, $, _) => {
       const seed = {}
       for (const [key, index] of value) seed[unpair(key)] = unpair(index);
 
-      return as(new Class(seed), index)
+      return as(new Class(seed), index, uuid)
     }
 
-    return as(new env[type](value), index);
+    return as(new env[type](value), index, uuid);
   };
 
   return unpair;
@@ -112,5 +127,10 @@ const deserializer = (json, classes, deserializers, $, _) => {
  * @param {Record[]} serialized a previously serialized value.
  * @returns {any}
  */
-export const deserialize = (serialized, {classes, deserializers, json} = {}) =>
-  deserializer(!!json, classes, deserializers, new Map, serialized)(0);
+export function deserialize(
+  serialized, {classes, deserializers, json, objects} = {}
+) {
+  return deserializer(
+    !!json, classes, deserializers, objects, new Map, serialized
+  )(0);
+}

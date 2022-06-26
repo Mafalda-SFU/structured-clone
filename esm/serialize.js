@@ -1,3 +1,5 @@
+import { randomUUID } from 'crypto'
+
 import errorToJSON from 'error-to-json'
 
 import {
@@ -54,11 +56,24 @@ const shouldSkip = ([TYPE, type]) => (
   (type === 'function' || type === 'symbol')
 );
 
-const serializer = (strict, json, serializers, $, _) => {
-
+const serializer = (strict, json, serializers, uuids, $, _) => {
   const as = (out, value) => {
     const index = _.push(out) - 1;
     $.set(value, index);
+
+    if(
+      uuids
+      && Array.isArray(out)
+      && out[0] !== BIGINT
+      && out[0] !== PRIMITIVE
+      && out.length === 2
+    ) {
+      const uuid = randomUUID()
+
+      out.push(uuid)
+      uuids.set(value, uuid);
+    }
+
     return index;
   };
 
@@ -66,6 +81,11 @@ const serializer = (strict, json, serializers, $, _) => {
     // Duplicates on current serialization
     if ($.has(value))
       return $.get(value);
+
+    // Duplicates of previous serializations
+    const uuid = uuids?.get(value)
+    // TODO: detect when it's used only once and set it directly in place
+    if (uuid !== undefined) return as(uuid, value);
 
     let [TYPE, type] = typeOf(value);
     switch (TYPE) {
@@ -147,6 +167,14 @@ const serializer = (strict, json, serializers, $, _) => {
         if (json && ('toJSON' in value)) {
           const result = pair(value.toJSON());
 
+          // It could be REALLY strange and wicked that somebody returns the
+          // same object twice when calling to `toJSON()` instead of creating a
+          // new one on-the-fly, and more strange and disturbing that a
+          // `fromJSON()` method would throw different results if the provided
+          // JSON objects are not strictly equals, but who knows... Anyway, call
+          // to `pair()` is already generating an UUID if needed, althought the
+          // important one is the one generated for this one (the real object,
+          // not the config one).
           return TYPE === OBJECT ? result : as([TYPE, result], value);
         }
 
@@ -198,7 +226,11 @@ const serializer = (strict, json, serializers, $, _) => {
  *  like JSON stringify would behave. Symbol and Function will be discarded.
  * @returns {Record[]}
  */
-export const serialize = (value, {json, lossy, serializers} = {}) => {
+export function serialize(value, {json, lossy, serializers, uuids} = {})
+{
   const _ = [];
-  return serializer(!(json || lossy), !!json, serializers, new Map, _)(value), _;
+
+  serializer(!(json || lossy), !!json, serializers, uuids, new Map, _)(value)
+
+  return _;
 };
