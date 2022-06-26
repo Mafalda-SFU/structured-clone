@@ -5,24 +5,27 @@ import {
   PRIMITIVE, ARRAY, OBJECT, DATE, REGEXP, MAP, SET, ERROR, BIGINT
 } from './types.js';
 
+
 const EMPTY = '';
 
 const {toString} = {};
 const {keys} = Object;
 
 const typeOf = value => {
+  // Primitives
   const type = typeof value;
   if (type !== 'object' || !value)
     return [PRIMITIVE, type];
 
+  // Objects
   const asString = toString.call(value).slice(8, -1);
   switch (asString) {
     case 'Array':
       return [ARRAY, EMPTY];
     case 'Object': {
       const {name} = value.constructor || {};
-      if(name !== 'Object') return [OBJECT, name];
-      return [OBJECT, EMPTY];
+
+      return [OBJECT, name === 'Object' ? EMPTY : name];
     }
     case 'Date':
       return [DATE, EMPTY];
@@ -34,12 +37,15 @@ const typeOf = value => {
       return [SET, EMPTY];
   }
 
+  // TypedArrays
   if (asString.includes('Array'))
     return [ARRAY, asString];
 
+  // Errors
   if (asString.includes('Error'))
     return [ERROR, asString];
 
+  // Non basic objects
   return [OBJECT, asString];
 };
 
@@ -57,6 +63,7 @@ const serializer = (strict, json, serializers, $, _) => {
   };
 
   const pair = value => {
+    // Duplicates on current serialization
     if ($.has(value))
       return $.get(value);
 
@@ -65,6 +72,7 @@ const serializer = (strict, json, serializers, $, _) => {
       // Basic types
       case PRIMITIVE: {
         let entry = value;
+
         switch (type) {
           case 'bigint':
             TYPE = BIGINT;
@@ -98,9 +106,11 @@ const serializer = (strict, json, serializers, $, _) => {
 
       // Collections
       case ARRAY: {
+        // TypedArray
         if (type)
           return as([type, [...value]], value);
 
+        // Regular Array
         const arr = [];
         const index = as([TYPE, arr], value);
         for (const entry of value)
@@ -122,8 +132,10 @@ const serializer = (strict, json, serializers, $, _) => {
           const serialize = serializers?.[type];
           if (serialize) {
             if (typeof serialize === 'function') {
-              const index = as([type], value);
-              _[index][1] = pair(serialize(value));
+              const out = [type]
+              const index = as(out, value);
+              out[1] = pair(serialize(value));
+
               return index;
             }
 

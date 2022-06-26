@@ -1,5 +1,3 @@
-import {ok} from 'assert/strict';
-
 import { parse } from 'error-to-json'
 
 import {
@@ -16,9 +14,11 @@ const deserializer = (json, classes, deserializers, $, _) => {
   };
 
   const unpair = index => {
+    // Duplicates on current serialization
     if ($.has(index))
       return $.get(index);
 
+    // Direct primitives shortcuts
     switch(index) {
       case VOID: return undefined;  // TODO: don't serialize
       case NULL: return null;
@@ -28,6 +28,7 @@ const deserializer = (json, classes, deserializers, $, _) => {
     }
 
     const [type, value] = _[index];
+    // Regular structured clone objects
     switch (type) {
       // Basic types
       case PRIMITIVE:
