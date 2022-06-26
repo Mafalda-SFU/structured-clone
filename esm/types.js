@@ -1,3 +1,7 @@
+export const EMPTY_STR  = -5;
+export const FALSE      = -4;
+export const TRUE       = -3;
+export const NULL       = -2;
 export const VOID       = -1;
 export const PRIMITIVE  = 0;
 export const ARRAY      = 1;

@@ -3,10 +3,8 @@ import {ok} from 'assert/strict';
 import { parse } from 'error-to-json'
 
 import {
-  VOID, PRIMITIVE,
-  ARRAY, OBJECT,
-  DATE, REGEXP, MAP, SET,
-  ERROR, BIGINT
+  EMPTY_STR, FALSE, TRUE, NULL, VOID,
+  PRIMITIVE, ARRAY, OBJECT, DATE, REGEXP, MAP, SET, ERROR, BIGINT
 } from './types.js';
 
 const env = typeof self === 'object' ? self : globalThis;
@@ -21,8 +19,13 @@ const deserializer = (json, classes, deserializers, $, _) => {
     if ($.has(index))
       return $.get(index);
 
-    if(_[index] === VOID)
-      return as(value, index);
+    switch(index) {
+      case VOID: return undefined;  // TODO: don't serialize
+      case NULL: return null;
+      case TRUE: return true;
+      case FALSE: return false;
+      case EMPTY_STR: return '';
+    }
 
     const [type, value] = _[index];
     switch (type) {

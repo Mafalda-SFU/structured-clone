@@ -1,10 +1,8 @@
 import errorToJSON from 'error-to-json'
 
 import {
-  VOID, PRIMITIVE,
-  ARRAY, OBJECT,
-  DATE, REGEXP, MAP, SET,
-  ERROR, BIGINT
+  EMPTY_STR, FALSE, TRUE, NULL, VOID,
+  PRIMITIVE, ARRAY, OBJECT, DATE, REGEXP, MAP, SET, ERROR, BIGINT
 } from './types.js';
 
 const EMPTY = '';
@@ -72,15 +70,23 @@ const serializer = (strict, json, serializers, $, _) => {
             TYPE = BIGINT;
             entry = value.toString();
             break;
+          case 'boolean':
+            return value ? TRUE : FALSE;
           case 'function':
           case 'symbol':
             if (strict)
               throw new TypeError('unable to serialize ' + type);
             entry = null;
             break;
+          case 'string':
+            if(entry === '') return EMPTY_STR;
+            break;
           case 'undefined':
-            return as(VOID, value);
+            return VOID;
         }
+
+        if(entry === null) return NULL;
+
         return as([TYPE, entry], value);
       }
       case DATE:

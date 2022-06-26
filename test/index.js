@@ -12,7 +12,7 @@ const assert = (result, expected, message = '') => {
 
 // @see https://github.com/ungap/structured-clone/issues/4
 const withUndefined = stringify({foo: 'test', bar: undefined, foobar: null});
-assert(withUndefined, '[[2,[[1,2],[3,4],[5,6]]],[0,"foo"],[0,"test"],[0,"bar"],[-1],[0,"foobar"],[0,null]]');
+assert(withUndefined, '[[2,[[1,2],[3,-1],[4,-2]]],[0,"foo"],[0,"test"],[0,"bar"],[0,"foobar"]]');
 assert(Object.keys(parse(withUndefined)).join(','), 'foo,bar,foobar');
 assert(parse(withUndefined).bar, void 0);
 
@@ -72,17 +72,17 @@ function test(firstRun = false) {
   console.timeEnd('serialized in');
 
   assert(JSON.stringify(serialized), [
-    `[[2,[[1,2],[3,4],[5,6],[7,8],[9,10],[11,12],[13,14],[15,16],[17,18],[20`,
-    `21],[23,24],[25,26],[27,28],[29,30],[31,32],[33,34],[35,36],[37,38]]],[0`,
-    `"arr"],[1,[0,0,0]],[0,"bigint"],[8,"1"],[0,"boolean"],[0,true],[0`,
-    `"number"],[0,123],[0,"string"],[0,""],[0,"undefined"],[-1],[0,"null"],[0`,
-    `null],[0,"int"],["Uint32Array",[1,2,3]],[0,"map"],[5,[[19,8]]],[0,"a"],[0`,
-    `"set"],[6,[19,22]],[0,"b"],[0,"Bool"],["Boolean",false],[0,"Num"]`,
-    `["Number",0],[0,"Str"],["String",""],[0,"re"],[4,{"source":"test"`,
-    `"flags":"gim"}],[0,"error"],[7,{"name":"Error","message":"test"`,
+    `[[2,[[1,2],[3,4],[5,-3],[6,7],[8,-5],[9,-1],[10,-2],[11,12],[13,14],[16`,
+    `17],[19,20],[21,22],[23,24],[25,26],[27,28],[29,30],[31,32],[33,34]]],[0`,
+    `"arr"],[1,[0,0,0]],[0,"bigint"],[8,"1"],[0,"boolean"],[0,"number"],[0`,
+    `123],[0,"string"],[0,"undefined"],[0,"null"],[0,"int"],["Uint32Array"`,
+    `[1,2,3]],[0,"map"],[5,[[15,7]]],[0,"a"],[0,"set"],[6,[15,18]],[0,"b"],[0`,
+    `"Bool"],["Boolean",false],[0,"Num"],["Number",0],[0,"Str"],["String",""]`,
+    `[0,"re"],[4,["test","gim"]],[0,"error"],[7,{"name":"Error"`,
+    `"message":"test"`,
     `"stack":"Error: test\\n    at Object.<anonymous> (/home/piranna/github/Mafalda/structured-clone/test/index.js:43:10)\\n    at Module._compile (node:internal/modules/cjs/loader:1112:14)\\n    at Module._extensions..js (node:internal/modules/cjs/loader:1166:10)\\n    at Module.load (node:internal/modules/cjs/loader:988:32)\\n    at Module._load (node:internal/modules/cjs/loader:834:12)\\n    at Function.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:77:12)\\n    at node:internal/main/run_main_module:17:47"}]`,
     `[0,"BI"],["BigInt","1"],[0,"date"],[3,"${date.toISOString()}"],[0`,
-    `"instance"],["Klass",[[19,39],[22,40]]],[0,1],[0,2]]`
+    `"instance"],["Klass",[[15,35],[18,36]]],[0,1],[0,2]]`
   ].join(','));
 
   // firstRun && console.log(serialized);
