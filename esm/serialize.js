@@ -56,7 +56,7 @@ const shouldSkip = ([TYPE, type]) => (
   (type === 'function' || type === 'symbol')
 );
 
-const serializer = (strict, json, serializers, uuids, $, _) => {
+const serializer = (strict, json, objects, serializers, uuids, $, _) => {
   const as = (out, value) => {
     const index = _.push(out) - 1;
     $.set(value, index);
@@ -72,6 +72,7 @@ const serializer = (strict, json, serializers, uuids, $, _) => {
 
       out.push(uuid)
       uuids.set(value, uuid);
+      objects?.set(uuid, value);
     }
 
     return index;
@@ -226,11 +227,14 @@ const serializer = (strict, json, serializers, uuids, $, _) => {
  *  like JSON stringify would behave. Symbol and Function will be discarded.
  * @returns {Record[]}
  */
-export function serialize(value, {json, lossy, serializers, uuids} = {})
-{
+export function serialize(
+  value, {json, lossy, objects, serializers, uuids} = {}
+) {
   const _ = [];
 
-  serializer(!(json || lossy), !!json, serializers, uuids, new Map, _)(value)
+  serializer(
+    !(json || lossy), !!json, objects, serializers, uuids, new Map, _
+  )(value)
 
   return _;
 };

@@ -7,11 +7,14 @@ import {
 
 const env = typeof self === 'object' ? self : globalThis;
 
-const deserializer = (json, classes, deserializers, objects, $, _) => {
+const deserializer = (json, classes, deserializers, objects, uuids, $, _) => {
   const as = (out, index, uuid) => {
     $.set(index, out);
 
-    if(uuid) objects?.set(uuid, out);
+    if(uuid) {
+      objects?.set(uuid, out);
+      uuids?.set(out, uuid);
+    }
 
     return out;
   };
@@ -128,9 +131,9 @@ const deserializer = (json, classes, deserializers, objects, $, _) => {
  * @returns {any}
  */
 export function deserialize(
-  serialized, {classes, deserializers, json, objects} = {}
+  serialized, {classes, deserializers, json, objects, uuids} = {}
 ) {
   return deserializer(
-    !!json, classes, deserializers, objects, new Map, serialized
+    !!json, classes, deserializers, objects, uuids, new Map, serialized
   )(0);
 }
