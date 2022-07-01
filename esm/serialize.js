@@ -56,27 +56,41 @@ const shouldSkip = ([TYPE, type]) => (
   (type === 'function' || type === 'symbol')
 );
 
-const serializer = (strict, json, objects, serializers, uuids, $, _) => {
+function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
+{
   const as = (out, value) => {
     const index = _.push(out) - 1;
     $.set(value, index);
 
     if(
-      uuids
+      (memoize || uuids)
       && Array.isArray(out)
       && out[0] !== BIGINT
       && out[0] !== PRIMITIVE
       && out.length === 2
     ) {
-      const uuid = randomUUID()
+      let isNewUuid
+
+      let uuid = uuids?.get(value)
+      if(!uuid) {
+        uuid = randomUUID()
+        isNewUuid = true
+      }
 
       out.push(uuid)
-      uuids.set(value, uuid);
-      objects?.set(uuid, value);
+
+      if(uuids && isNewUuid) {
+        uuids.set(value, uuid);
+        objects?.set(uuid, value);
+      }
+
+      memoize?.set(value, uuid);
     }
 
     return index;
   };
+
+  const serializerObjects = memoize || objects
 
   const pair = value => {
     // Duplicates on current serialization
@@ -84,7 +98,7 @@ const serializer = (strict, json, objects, serializers, uuids, $, _) => {
       return $.get(value);
 
     // Duplicates of previous serializations
-    const uuid = uuids?.get(value)
+    const uuid = serializerObjects?.get(value)
     // TODO: detect when it's used only once and set it directly in place
     if (uuid !== undefined) return as(uuid, value);
 
@@ -228,13 +242,14 @@ const serializer = (strict, json, objects, serializers, uuids, $, _) => {
  * @returns {Record[]}
  */
 export function serialize(
-  value, {json, lossy, objects, serializers, uuids} = {}
+  value, {json, lossy, memoize, objects, serializers, uuids} = {}
 ) {
-  const _ = [];
+  const result = [];
 
   serializer(
-    !(json || lossy), !!json, objects, serializers, uuids, new Map, _
+    !(json || lossy), !!json, memoize, objects, serializers, uuids, new Map,
+    result
   )(value)
 
-  return _;
+  return result;
 };
