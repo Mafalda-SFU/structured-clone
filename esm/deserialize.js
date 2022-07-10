@@ -9,7 +9,9 @@ import {
 
 const env = typeof self === 'object' ? self : globalThis;
 
-const deserializer = (json, classes, deserializers, objects, uuids, $, _) => {
+function deserializer(
+  json, classes, deserializers, objects, update, uuids, $, _
+) {
   const as = (out, index, uuid) => {
     $.set(index, out);
 
@@ -27,9 +29,19 @@ const deserializer = (json, classes, deserializers, objects, uuids, $, _) => {
   };
 
   const unpair = index => {
-    // Duplicates on current serialization
-    if ($.has(index))
-      return $.get(index);
+    if(!update) {
+      // Duplicates on current serialization
+      if ($.has(index))
+        return $.get(index);
+
+      // Direct duplicates of previous serializations
+      if(typeof index === 'string') {  // `index` is an UUID string
+        const object = objects?.get(index)
+        ok(object !== undefined, `Unknown object for UUID '${index}'`)
+
+        return object;
+      }
+    }
 
     // Direct primitives shortcuts
     switch(index) {
@@ -38,14 +50,6 @@ const deserializer = (json, classes, deserializers, objects, uuids, $, _) => {
       case TRUE: return true;
       case FALSE: return false;
       case EMPTY_STR: return '';
-    }
-
-    // Direct duplicates of previous serializations
-    if(typeof index === 'string') {  // `index` is an UUID string
-      const object = objects?.get(index)
-      ok(object !== undefined, `Unknown object for UUID '${index}'`)
-
-      return object;
     }
 
     const entry = _[index]
@@ -72,25 +76,25 @@ const deserializer = (json, classes, deserializers, objects, uuids, $, _) => {
 
       // Collections
       case ARRAY: {
-        const arr = as([], index, uuid);
+        const arr = (objects && update) ? objects.get(uuid) : as([], index, uuid);
         for (const index of value)
           arr.push(unpair(index));
         return arr;
       }
       case OBJECT: {
-        const object = as({}, index, uuid);
+        const object = (objects && update) ? objects.get(uuid) : as({}, index, uuid);
         for (const [key, index] of value)
           object[unpair(key)] = unpair(index);
         return object;
       }
       case MAP: {
-        const map = as(new Map, index, uuid);
+        const map = (objects && update) ? objects.get(uuid) : as(new Map, index, uuid);
         for (const [key, index] of value)
           map.set(unpair(key), unpair(index));
         return map;
       }
       case SET: {
-        const set = as(new Set, index, uuid);
+        const set = (objects && update) ? objects.get(uuid) : as(new Set, index, uuid);
         for (const index of value)
           set.add(unpair(index));
         return set;
@@ -138,9 +142,9 @@ const deserializer = (json, classes, deserializers, objects, uuids, $, _) => {
  * @returns {any}
  */
 export function deserialize(
-  serialized, {classes, deserializers, json, objects, uuids} = {}
+  serialized, {classes, deserializers, json, objects, update, uuids} = {}
 ) {
   return deserializer(
-    !!json, classes, deserializers, objects, uuids, new Map, serialized
+    !!json, classes, deserializers, objects, update, uuids, new Map, serialized
   )(0);
 }
