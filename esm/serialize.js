@@ -1,3 +1,4 @@
+import {ok} from 'assert/strict';
 import { randomUUID } from 'crypto'
 
 import errorToJSON from 'error-to-json'
@@ -244,6 +245,8 @@ function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
 export function serialize(
   value, {json, lossy, memoize, objects, serializers, uuids} = {}
 ) {
+  ok(arguments.length, 'value argument not provided')
+
   const result = [];
 
   serializer(
