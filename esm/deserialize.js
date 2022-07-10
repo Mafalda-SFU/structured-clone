@@ -1,3 +1,5 @@
+import {ok} from 'assert/strict'
+
 import { parse } from 'error-to-json'
 
 import {
@@ -11,8 +13,13 @@ const deserializer = (json, classes, deserializers, objects, uuids, $, _) => {
   const as = (out, index, uuid) => {
     $.set(index, out);
 
-    if(uuid) {
-      objects?.set(uuid, out);
+    if(uuid && objects) {
+      ok(
+        !objects.has(uuid),
+        'received appData that conflicts with previously stored one'
+      )
+
+      objects.set(uuid, out);
       uuids?.set(out, uuid);
     }
 
