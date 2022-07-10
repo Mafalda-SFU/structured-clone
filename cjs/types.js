@@ -1,4 +1,12 @@
 'use strict';
+const EMPTY_STR  = -5;
+exports.EMPTY_STR = EMPTY_STR;
+const FALSE      = -4;
+exports.FALSE = FALSE;
+const TRUE       = -3;
+exports.TRUE = TRUE;
+const NULL       = -2;
+exports.NULL = NULL;
 const VOID       = -1;
 exports.VOID = VOID;
 const PRIMITIVE  = 0;
