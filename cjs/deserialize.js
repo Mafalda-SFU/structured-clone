@@ -65,14 +65,14 @@ function deserializer(
     // if(entry === true  || entry === TRUE ) return as(true, index);
     // if(entry === false || entry === FALSE) return as(false, index);
 
-    // // Indexed duplicates of previous serializations (can be shorter than direct
-    // // ones when there are several ones)
-    // if(typeof entry === 'string') {  // `entry` is an UUID string
-    //   const object = objects?.get(entry)
-    //   ok(object !== undefined, `Unknown object for UUID '${entry}'`)
+    // Indexed duplicates of previous serializations (can be shorter than direct
+    // ones when there are several ones)
+    if(typeof entry === 'string') {  // `entry` is an UUID string
+      const object = objects?.get(entry)
+      ok(object !== undefined, `Unknown object for UUID '${entry}'`)
 
-    //   return object;
-    // }
+      return object;
+    }
 
     // Regular structured clone objects
     const [type, value, uuid] = entry;
@@ -87,6 +87,7 @@ function deserializer(
       case ERROR:
         return as(parse(value), index, uuid);
 
+      // BigInt, it can be defined both as a primitive or an object, see
       // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#comparisons
       case BIGINT:
         return as(BigInt(value), index);
@@ -94,27 +95,28 @@ function deserializer(
         // Instance, needs UUID for equality
         return as(Object(BigInt(value)), index, uuid);
 
-      // Collections
+      // Collections, if `update` is defined and they exists use it, if not
+      // create then a new one
       case ARRAY: {
-        const arr = (objects && update) ? objects.get(uuid) : as([], index, uuid);
+        const arr = (objects && update && objects.get(uuid)) || as([], index, uuid);
         for (const index of value)
           arr.push(unpair(index));
         return arr;
       }
       case OBJECT: {
-        const object = (objects && update) ? objects.get(uuid) : as({}, index, uuid);
+        const object = (objects && update && objects.get(uuid)) || as({}, index, uuid);
         for (const [key, index] of value)
           object[unpair(key)] = unpair(index);
         return object;
       }
       case MAP: {
-        const map = (objects && update) ? objects.get(uuid) : as(new Map, index, uuid);
+        const map = (objects && update && objects.get(uuid)) || as(new Map, index, uuid);
         for (const [key, index] of value)
           map.set(unpair(key), unpair(index));
         return map;
       }
       case SET: {
-        const set = (objects && update) ? objects.get(uuid) : as(new Set, index, uuid);
+        const set = (objects && update && objects.get(uuid)) || as(new Set, index, uuid);
         for (const index of value)
           set.add(unpair(index));
         return set;
