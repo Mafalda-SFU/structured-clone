@@ -7,6 +7,7 @@ import {
   PRIMITIVE, ARRAY, OBJECT, DATE, REGEXP, MAP, SET, ERROR, BIGINT
 } from './types.js';
 
+
 const env = typeof self === 'object' ? self : globalThis;
 
 function deserializer(
@@ -18,7 +19,7 @@ function deserializer(
     if(uuid && objects) {
       ok(
         !objects.has(uuid),
-        'received appData that conflicts with previously stored one'
+        'received object that conflicts with previously stored one'
       )
 
       objects.set(uuid, out);
@@ -28,7 +29,7 @@ function deserializer(
     return out;
   };
 
-  const unpair = index => {
+  function unpair(index) {
     if(!update) {
       // Duplicates on current serialization
       if ($.has(index))
@@ -44,6 +45,7 @@ function deserializer(
     }
 
     // Direct primitives shortcuts
+    // TODO: Support non-UUID strings
     switch(index) {
       case VOID: return undefined;  // TODO: don't serialize
       case NULL: return null;
