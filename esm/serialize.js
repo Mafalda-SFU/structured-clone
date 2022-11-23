@@ -156,15 +156,6 @@ function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
       }
       case OBJECT: {
         if (type) {
-          switch (type) {
-            case 'BigInt':
-              return as([type, value.toString()], value);
-            case 'Boolean':
-            case 'Number':
-            case 'String':
-              return as([type, value.valueOf()], value);
-          }
-
           // Serializers
           const serialize = serializers?.[type];
           if (serialize) {
@@ -177,6 +168,16 @@ function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
             }
 
             TYPE = type;
+          }
+
+          // Regular objects
+          switch (type) {
+            case 'BigInt':
+              return as([type, value.toString()], value);
+            case 'Boolean':
+            case 'Number':
+            case 'String':
+              return as([type, value.valueOf()], value);
           }
         }
 
