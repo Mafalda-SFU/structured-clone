@@ -92,7 +92,7 @@ function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
     return index;
   };
 
-  const serializerObjects = memoize || objects
+  const serializedUuids = memoize || uuids
 
   function pair(value) {
     // Duplicates on current serialization
@@ -100,7 +100,7 @@ function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
       return $.get(value);
 
     // Duplicates of previous serializations
-    const uuid = serializerObjects?.get(value)
+    const uuid = serializedUuids?.get(value)
     // TODO: detect when it's used only once and set it directly in place
     if (uuid !== undefined) return as(uuid, value);
 
