@@ -71,7 +71,9 @@ function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
 
       let uuid = uuids?.get(value)
       if(!uuid) {
-        uuid = randomUUID()
+        // TODO: possible infinite loop, check for limits
+        while((uuid = randomUUID()) && uuids.has(uuid));
+
         isNewUuid = true
       }
 
