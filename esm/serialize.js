@@ -60,9 +60,6 @@ const shouldSkip = ([TYPE, type]) => (
 function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
 {
   const as = (out, value) => {
-    const index = _.push(out) - 1;
-    $.set(value, index);
-
     if(
       (memoize || uuids)
       && Array.isArray(out)
@@ -88,12 +85,14 @@ function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
       memoize?.set(value, uuid);
     }
 
+    const index = _.push(out) - 1;
+    $.set(value, index);
     return index;
   };
 
   const serializedUuids = memoize || uuids
 
-  const pair = value => {
+  function pair(value) {
     // Duplicates on current serialization
     if ($.has(value))
       return $.get(value);
