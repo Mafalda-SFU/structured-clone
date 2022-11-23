@@ -98,25 +98,25 @@ function deserializer(
       // Collections, if `update` is defined and they exists use it, if not
       // create then a new one
       case ARRAY: {
-        const arr = (objects && update && objects.get(uuid)) || as([], index, uuid);
+        const arr = (update && objects?.get(uuid)) || as([], index, uuid);
         for (const index of value)
           arr.push(unpair(index));
         return arr;
       }
       case OBJECT: {
-        const object = (objects && update && objects.get(uuid)) || as({}, index, uuid);
+        const object = (update && objects?.get(uuid)) || as({}, index, uuid);
         for (const [key, index] of value)
           object[unpair(key)] = unpair(index);
         return object;
       }
       case MAP: {
-        const map = (objects && update && objects.get(uuid)) || as(new Map, index, uuid);
+        const map = (update && objects?.get(uuid)) || as(new Map, index, uuid);
         for (const [key, index] of value)
           map.set(unpair(key), unpair(index));
         return map;
       }
       case SET: {
-        const set = (objects && update && objects.get(uuid)) || as(new Set, index, uuid);
+        const set = (update && objects?.get(uuid)) || as(new Set, index, uuid);
         for (const index of value)
           set.add(unpair(index));
         return set;
@@ -160,7 +160,9 @@ function deserializer(
 
 /**
  * Returns a deserialized value from a serialized array of Records.
+ *
  * @param {Record[]} serialized a previously serialized value.
+ *
  * @returns {any}
  */
 function deserialize(
