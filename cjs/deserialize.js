@@ -19,7 +19,7 @@ function deserializer(
     if(uuid && objects) {
       ok(
         !objects.has(uuid),
-        'received object that conflicts with previously stored one'
+        `received object that conflicts with previously stored one (${uuid})`
       )
 
       objects.set(uuid, out);
