@@ -1,4 +1,4 @@
-import {ok} from 'assert/strict'
+import {ok} from 'node:assert/strict'
 
 import { parse } from 'error-to-json'
 

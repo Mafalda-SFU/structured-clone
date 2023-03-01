@@ -1,5 +1,5 @@
 'use strict';
-const {ok} = require('assert/strict')
+const {ok} = require('node:assert/strict')
 
 const { parse } = require('error-to-json')
 
@@ -55,15 +55,6 @@ function deserializer(
     }
 
     const entry = _[index]
-
-    // // Indexed primitives shortcuts (can be shorter than direct ones when there
-    // // are several ones)
-    // // TODO: Support non-UUID strings
-    // if(entry === VOID) return as(undefined, index);  // TODO: don't serialize
-    // if(entry === EMPTY_STR) return '';
-    // if(entry === null  || entry === NULL ) return as(null, index);
-    // if(entry === true  || entry === TRUE ) return as(true, index);
-    // if(entry === false || entry === FALSE) return as(false, index);
 
     // Indexed duplicates of previous serializations (can be shorter than direct
     // ones when there are several ones)

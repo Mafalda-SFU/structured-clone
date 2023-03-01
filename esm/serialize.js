@@ -1,5 +1,5 @@
-import {ok} from 'assert/strict';
-import { randomUUID } from 'crypto'
+import {ok} from 'node:assert/strict';
+import { randomUUID } from 'node:crypto'
 
 import errorToJSON from 'error-to-json'
 

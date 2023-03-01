@@ -1,6 +1,6 @@
 'use strict';
-const {ok} = require('assert/strict');
-const { randomUUID } = require('crypto')
+const {ok} = require('node:assert/strict');
+const { randomUUID } = require('node:crypto')
 
 const errorToJSON = (m => /* c8 ignore start */ m.__esModule ? m.default : m /* c8 ignore stop */)(require('error-to-json'))
 
@@ -226,9 +226,7 @@ function serializer(strict, json, memoize, objects, serializers, uuids, $, _)
     }
 
     // `ERROR` and other unknown `TYPE`s
-    // TODO: detect when it's smaller embedded or decoupled as object
     return as([TYPE, errorToJSON(value)], value);
-    // return as([TYPE, pair(errorToJSON(value))], value);
   };
 
   return pair;
